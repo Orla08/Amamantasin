@@ -2,21 +2,31 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image, Safe
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigation } from '@react-navigation/native'
+import { useForm } from 'react-hook-form'
+import Imputs from '../componentes/imputs/Imputs'
 
 const iconUsuario = require('../../assets/iconos/iconUsuario.png')
 const icoEdad = require('../../assets/iconos/edad.png')
 const icoEmail = require('../../assets/iconos/iconEmail.png');
 const icoContrasena = require('../../assets/iconos/iconContrasena.png');
 
+const EMAIL_REGEX = /^(([^<>()\[\]\.,;:\s@\”]+(\.[^<>()\[\]\.,;:\s@\”]+)*)|(\”.+\”))@(([^<>()[\]\.,;:\s@\”]+\.)+[^<>()[\]\.,;:\s@\”]{2,})$/
+
 const Registro = () => {
+    const { control, handleSubmit, watch } = useForm()
+
+    const conRep = watch('contrasena')
+
 
     const [nombre, setNombre] = useState('')
     const [edad, setEdad] = useState(0)
     const [email, setEmail] = useState('')
     const [contrasena, setContrasena] = useState('')
+    const [contrasenarepet, setContrasenarepet] = useState('')
     const [ok, setOk] = useState(false)
     const [enviar, setEnviar] = useState(false)
     const [contra2, setContra2] = useState('');
+
 
     const autenticacion = async () => { //Declara una función asíncrona llamada 
         try {//Es un bloque try...catch, que maneja los errores que puedan ocurrir durante la ejecución de la función.
@@ -65,12 +75,14 @@ const Registro = () => {
                 {
                     text: 'OK', onPress: () => {
                         autenticacion()
-                        xx.navigate("Login")
-                        console.log('Registro Exitoso')
                     }
                 }
             ]
         );
+
+    const pressRegister = (data) => {
+        console.log(data)
+    }
 
     const xx = useNavigation();
     return (
@@ -85,7 +97,73 @@ const Registro = () => {
                 <View>
                     {/* Formulario De Login*/}
                     <Text style={styles.txtRegistarse}>Registrarse</Text>
-                    <View style={styles.containInputs}>
+
+                    <Imputs
+                        imagen={iconUsuario}
+                        name="nombre"
+                        placeholder="Nombre"
+                        datos={nombre}
+                        setDatos={setNombre}
+                        control={control}
+                        rules={{
+                            required: 'Nombre Requerido',
+                        }}
+                    />
+                    <Imputs
+                        imagen={icoEdad}
+                        name="edad"
+                        placeholder="Edad"
+                        datos={edad}
+                        setDatos={setEdad}
+                        keyboardType="numeric"
+                        control={control}
+                        rules={{
+                            required: 'Edad Requerida',
+                            min: {
+                                value: 15,
+                                message: "Debe ser mayor de 15 años"
+                            }
+                        }}
+                    />
+                    <Imputs
+                        imagen={icoEmail}
+                        name="email"
+                        placeholder="Email"
+                        datos={email}
+                        setDatos={setEmail}
+                        control={control}
+                        rules={{
+                            pattern:
+                            {
+                                value: EMAIL_REGEX,
+                                message: "Email Invalido"
+                            },
+                            required: 'Email Requerido',
+                        }}
+                    />
+                    <Imputs
+                        imagen={icoContrasena}
+                        name="contrasena"
+                        placeholder="Contraseña"
+                        control={control}
+                        setDatos={setContrasena}
+                        rules={{
+                            required: 'Contraseña Requerida',
+                            minLength: { value: 5, message: "Contraseña debe contener 5 caracteres minimos" }
+                        }}
+                    />
+                    <Imputs
+                        imagen={icoContrasena}
+                        name="contrasena_repetida"
+                        placeholder="Verificar Contraseña"
+                        datos={contrasenarepet}
+                        setDatos={setContrasenarepet}
+                        control={control}
+                        rules={{
+                            validate: value => value === conRep || 'La contraseña no coincide'
+                        }}
+                    />
+                    {/* <View style={styles.containInputs}>
                         <Image
                             style={styles.iconos}
                             source={iconUsuario}
@@ -127,12 +205,13 @@ const Registro = () => {
                             secureTextEntry={true}
                             onChangeText={(txtEscrito) => { setContrasena(txtEscrito) }}
                         />
-                    </View>
+                    </View> */}
                     <View style={styles.containerButtoms}>
                         <TouchableOpacity style={styles.button}
-                            onPress={() => {
-                                showAlert()
-                            }}
+                            onPress={
+                                handleSubmit(autenticacion)
+
+                            }
                         >
                             <Text style={styles.TextBotones}>Registrarse</Text>
                         </TouchableOpacity>

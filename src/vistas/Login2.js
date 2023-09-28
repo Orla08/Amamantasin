@@ -3,6 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react'
 import axios from 'axios'
 import { useNavigation } from '@react-navigation/native';
+import { useForm, Controller } from 'react-hook-form';
+import Imputs from '../componentes/imputs/Imputs';
+
 // import { useNavigation } from '@react-navigation/native';
 
 
@@ -11,11 +14,16 @@ const icoEdad = require('../../assets/iconos/edad.png')
 const icoEmail = require('../../assets/iconos/iconEmail.png');
 const icoContrasena = require('../../assets/iconos/iconContrasena.png');
 
+const EMAIL_REGEX = /^(([^<>()\[\]\.,;:\s@\”]+(\.[^<>()\[\]\.,;:\s@\”]+)*)|(\”.+\”))@(([^<>()[\]\.,;:\s@\”]+\.)+[^<>()[\]\.,;:\s@\”]{2,})$/
+
 const Login2 = () => {
     const [id, setId] = useState(0);
     const [email, setEmail] = useState('');
     const [contrasena, setContrasena] = useState('');
-    const [enviar, setEnviar] = useState(false)
+    //const [enviar, setEnviar] = useState(false)
+
+
+
     /*const autenticacion = async () => { //Declara una función asíncrona llamada 
         try {//Es un bloque try...catch, que maneja los errores que puedan ocurrir durante la ejecución de la función.
             //const response = await axios.post(...): Utiliza Axios para realizar una solicitud POST al servidor. Los datos proporcionados 
@@ -36,6 +44,17 @@ const Login2 = () => {
             setEnviar(false);// Independientemente de si la solicitud tuvo éxito o falló, este bloque se ejecutará y establecerá el estado enviar en false, lo que significa que no se realizará otra solicitud hasta que se active manualmente.
         }
     }*/
+
+
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm(); //Hacemos un object destructuring en el cual obtenemos dos funciones de la clase useForm()
+
+    console.log(errors);
+
+
 
     const autenticacion = async () => {
         try {
@@ -66,9 +85,9 @@ const Login2 = () => {
         }
     };
 
-
-
-
+    const onSignIn = data => {
+        console.log(data);
+    }
 
 
     const xx = useNavigation()
@@ -80,7 +99,7 @@ const Login2 = () => {
                     style={styles.imgLogo}
                 />
                 <Text style={styles.txtRegistarse}>Ingresa con tu cuenta o crea una nueva</Text>
-                <View style={styles.containInputs}>
+                {/* <View style={styles.containInputs}>
                     <Image
                         style={styles.iconos}
                         source={icoEmail}
@@ -101,13 +120,49 @@ const Login2 = () => {
                         secureTextEntry={true}
                         onChangeText={(txtEscrito) => { setContrasena(txtEscrito) }}
                     />
-                </View>
+                </View> */}
+                <Imputs
+                    imagen={icoEmail}
+                    name="email"
+                    placeholder="Email"
+                    datos={email}
+                    setDatos={setEmail}
+                    control={control}
+                    rules={{
+                        pattern:
+                        {
+                            value: EMAIL_REGEX,
+                            message: "Email Invalido"
+                        },
+                        required: 'Email Requerido',
+                    }}
+                />
+
+                <Imputs
+                    imagen={icoContrasena}
+                    name="contrasena"
+                    placeholder="Contraseña"
+                    datos={contrasena}
+                    setDatos={setContrasena}
+                    secureTextEntry
+                    rules={{
+                        required: 'Contraseña Requerida',
+                        minLength: { value: 5, message: "Contraseña debe contener 5 caracteres minimos" },
+                        maxLength: { value: 14, message: "Contraseña debe contener 14 caracteres maximo" }
+                    }}
+                    control={control}
+                />
+
+
+
+                {/* <TextInput placeholder="Contraseña" style={styles.inputs} /> */}
+
                 <View >
                     <TouchableOpacity style={styles.btnIngreso}
-                        onPress={() => {
-                            autenticacion()
-                            setEnviar(true)
-                        }}
+                        onPress={
+                            handleSubmit(autenticacion)
+                            //setEnviar(true)
+                        }
                     ><Text style={styles.txtInferior}>Ingresar</Text>
                     </TouchableOpacity>
 
@@ -161,6 +216,7 @@ const styles = StyleSheet.create({
     inputs: {
         marginLeft: 10,
         width: 210,
+        color: 'black'
     },
     iconos: {
         width: 20,
